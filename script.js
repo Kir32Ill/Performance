@@ -1,68 +1,61 @@
 (function() {
     "use strict";
-    const initSkeleton = () => {
-        const app = document.getElementById('app');
-        if (!app) return;
 
-        app.innerHTML = `
-            <header class="header">
-                <a href="/" class="header__logo" aria-label="Яндекс.Дом"></a>
-                <button class="header__menu" aria-expanded="false">
-                    <span class="header__menu-text a11y-hidden">Меню</span>
-                </button>
-                <ul class="header__links">
-                    <li class="header__item"><a href="/" class="header__link header__link_current" aria-current="page">Сводка</a></li>
-                    <li class="header__item"><a href="/devices" class="header__link">Устройства</a></li>
-                    <li class="header__item"><a href="/scripts" class="header__link">Сценарии</a></li>
-                </ul>
-            </header>
-            <main class="main">
-                <section class="section main__general">
-                    <h2 class="section__title section__title-header section__main-title">Главное</h2>
-                    <div class="hero-dashboard">
-                        <div class="hero-dashboard__primary">
-                            <h3 class="hero-dashboard__title">Привет, Геннадий!</h3>
-                            <p class="hero-dashboard__subtitle">Двери и окна закрыты, сигнализация включена.</p>
-                            <ul class="hero-dashboard__info">
-                                <li class="hero-dashboard__item">
-                                    <div class="hero-dashboard__item-title">Дома</div>
-                                    <div class="hero-dashboard__item-details">+23<span class="a11y-hidden">°</span></div>
-                                </li>
-                                <li class="hero-dashboard__item">
-                                    <div class="hero-dashboard__item-title">За окном</div>
-                                    <div class="hero-dashboard__item-details">+19<span class="a11y-hidden">°</span><div class="hero-dashboard__icon hero-dashboard__icon_rain" role="img" aria-label="Дождь"></div></div>
-                                </li>
-                            </ul>
-                        </div>
-                        <ul class="hero-dashboard__schedule"></ul>
-                    </div>
-                </section>
-                <section class="section main__scripts">
-                    <h2 class="section__title section__title-header">Избранные сценарии</h2>
-                    <ul class="event-grid"></ul>
-                </section>
-                <section class="section main__devices">
-                    <div class="section__title">
-                        <h2 class="section__title-header">Избранные устройства</h2>
-                        <select class="section__select"></select>
-                        <ul class="section__tabs" role="tablist"></ul>
-                    </div>
-                    <div class="section__panel-wrapper"></div>
-                </section>
-            </main>
-            <footer class="footer">
-                <ul class="footer__list">
-                    <li class="footer__item"><a class="footer__link" href="/">Помощь</a></li>
-                    <li class="footer__item"><a class="footer__link" href="/">Обратная связь</a></li>
-                    <li class="footer__item"><a class="footer__link" href="/">Разработчикам</a></li>
-                    <li class="footer__item"><a class="footer__link" href="/">Условия использования</a></li>
-                </ul>
-                <div class="footer__copyright">© 1997–2023 ООО «Яндекс»</div>
-            </footer>
-        `;
+    const app = document.getElementById('app');
+    if (!app) return;
+
+    const TABS = {
+        all: {
+            title: 'Все',
+            items: [
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включено' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'D-Link Omna 180 Cam', subtitle: 'Включится в 17:00' },
+                { icon: 'temp', iconLabel: 'Температура', title: 'Elgato Eve Degree Connected', subtitle: 'Выключено до 17:00' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'LIFX Mini Day & Dusk A60 E27', subtitle: 'Включится в 17:00' },
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Mi Air Purifier 2S', subtitle: 'Включено' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'Philips Zhirui', subtitle: 'Включено' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'Philips Zhirui', subtitle: 'Включено' },
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Mi Air Purifier 2S', subtitle: 'Включено' }
+            ]
+        },
+        kitchen: {
+            title: 'Кухня',
+            items: [
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включено' },
+                { icon: 'temp', iconLabel: 'Температура', title: 'Elgato Eve Degree Connected', subtitle: 'Выключено до 17:00' }
+            ]
+        },
+        hall: {
+            title: 'Зал',
+            items: [
+                { icon: 'light', iconLabel: 'Освещение', title: 'Philips Zhirui', subtitle: 'Выключено' },
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Mi Air Purifier 2S', subtitle: 'Выключено' }
+            ]
+        },
+        lights: {
+            title: 'Лампочки',
+            items: [
+                { icon: 'light', iconLabel: 'Освещение', title: 'D-Link Omna 180 Cam', subtitle: 'Включится в 17:00' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'LIFX Mini Day & Dusk A60 E27', subtitle: 'Включится в 17:00' },
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Mi Air Purifier 2S', subtitle: 'Включено' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'Philips Zhirui', subtitle: 'Включено' }
+            ]
+        },
+        cameras: {
+            title: 'Камеры',
+            items: [
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Mi Air Purifier 2S', subtitle: 'Включено' }
+            ]
+        }
     };
 
-    const createEvent = (props) => {
+    for (let i = 0; i < 6; i++) {
+        TABS.all.items = [...TABS.all.items, ...TABS.all.items];
+    }
+
+    const TABS_KEYS = Object.keys(TABS);
+
+    function Event(props) {
         const li = document.createElement('li');
         li.className = props.slim ? 'event event_slim' : 'event';
         
@@ -89,184 +82,362 @@
         }
         
         li.appendChild(button);
+        
+        if (props.onSize) {
+            setTimeout(() => {
+                const width = li.offsetWidth;
+                const height = li.offsetHeight;
+                props.onSize({ width, height });
+            }, 0);
+        }
+        
         return li;
-    };
+    }
 
-    const loadData = () => {
-        const baseItems = [
-            { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включено' },
-            { icon: 'light', iconLabel: 'Освещение', title: 'D-Link Omna 180 Cam', subtitle: 'Включится в 17:00' },
-            { icon: 'temp', iconLabel: 'Температура', title: 'Elgato Eve Degree Connected', subtitle: 'Выключено до 17:00' },
-            { icon: 'light', iconLabel: 'Освещение', title: 'LIFX Mini Day & Dusk A60 E27', subtitle: 'Включится в 17:00' },
-            { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Mi Air Purifier 2S', subtitle: 'Включено' },
-            { icon: 'light', iconLabel: 'Освещение', title: 'Philips Zhirui', subtitle: 'Включено' }
+    function Header() {
+        let expanded = false;
+        let toggled = false;
+        
+        const header = document.createElement('header');
+        header.className = 'header';
+        
+        const logo = document.createElement('a');
+        logo.href = '/';
+        logo.className = 'header__logo';
+        logo.setAttribute('aria-label', 'Яндекс.Дом');
+        
+        const menuButton = document.createElement('button');
+        menuButton.className = 'header__menu';
+        menuButton.setAttribute('aria-expanded', 'false');
+        
+        const menuText = document.createElement('span');
+        menuText.className = 'header__menu-text a11y-hidden';
+        menuText.textContent = 'Открыть меню';
+        
+        menuButton.appendChild(menuText);
+        
+        const links = document.createElement('ul');
+        links.className = 'header__links';
+        
+        const linksData = [
+            { text: 'Сводка', href: '/', current: true },
+            { text: 'Устройства', href: '/devices' },
+            { text: 'Сценарии', href: '/scripts' }
         ];
-
-        const allItems = Array(64).fill().flatMap(() => baseItems.slice());
-
-        return {
-            all: { title: 'Все', items: allItems },
-            kitchen: {
-                title: 'Кухня',
-                items: baseItems.slice(0, 2)
-            },
-            hall: {
-                title: 'Зал',
-                items: baseItems.slice(2, 4)
-            },
-            lights: {
-                title: 'Лампочки',
-                items: baseItems.slice(1, 5)
-            },
-            cameras: {
-                title: 'Камеры',
-                items: baseItems.slice(0, 1)
-            }
-        };
-    };
-    const initApp = () => {
-        const menuButton = document.querySelector('.header__menu');
-        const links = document.querySelector('.header__links');
-        let menuExpanded = false;
-
-        menuButton.addEventListener('click', () => {
-            menuExpanded = !menuExpanded;
-            menuButton.setAttribute('aria-expanded', menuExpanded);
-            links.classList.toggle('header__links_opened', menuExpanded);
+        
+        linksData.forEach(linkData => {
+            const item = document.createElement('li');
+            item.className = 'header__item';
+            
+            const link = document.createElement('a');
+            link.className = linkData.current ? 'header__link header__link_current' : 'header__link';
+            link.href = linkData.href;
+            if (linkData.current) link.setAttribute('aria-current', 'page');
+            link.textContent = linkData.text;
+            
+            item.appendChild(link);
+            links.appendChild(item);
         });
+        
+        menuButton.addEventListener('click', () => {
+            if (!toggled) toggled = true;
+            expanded = !expanded;
+            
+            menuButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            menuText.textContent = expanded ? 'Закрыть меню' : 'Открыть меню';
+            
+            links.className = `header__links${expanded ? ' header__links_opened' : ''}${toggled ? ' header__links-toggled' : ''}`;
+        });
+        
+        header.appendChild(logo);
+        header.appendChild(menuButton);
+        header.appendChild(links);
+        
+        return header;
+    }
 
-        const TABS = loadData();
-        const TABS_KEYS = Object.keys(TABS);
-
-        const select = document.querySelector('.section__select');
-        const tabsList = document.querySelector('.section__tabs');
-        const panelWrapper = document.querySelector('.section__panel-wrapper');
-        let activeTab = 'all';
-        let hasRightScroll = false;
-
+    function Main() {
+        const main = document.createElement('main');
+        main.className = 'main';
+        
+        const generalSection = document.createElement('section');
+        generalSection.className = 'section main__general';
+        
+        const generalTitle = document.createElement('h2');
+        generalTitle.className = 'section__title section__title-header section__main-title';
+        generalTitle.textContent = 'Главное';
+        
+        const heroDashboard = document.createElement('div');
+        heroDashboard.className = 'hero-dashboard';
+        
+        const primaryDiv = document.createElement('div');
+        primaryDiv.className = 'hero-dashboard__primary';
+        
+        const dashboardTitle = document.createElement('h3');
+        dashboardTitle.className = 'hero-dashboard__title';
+        dashboardTitle.textContent = 'Привет, Геннадий!';
+        
+        const dashboardSubtitle = document.createElement('p');
+        dashboardSubtitle.className = 'hero-dashboard__subtitle';
+        dashboardSubtitle.textContent = 'Двери и окна закрыты, сигнализация включена.';
+        
+        const infoList = document.createElement('ul');
+        infoList.className = 'hero-dashboard__info';
+        
+        const homeItem = document.createElement('li');
+        homeItem.className = 'hero-dashboard__item';
+        
+        const homeTitle = document.createElement('div');
+        homeTitle.className = 'hero-dashboard__item-title';
+        homeTitle.textContent = 'Дома';
+        
+        const homeDetails = document.createElement('div');
+        homeDetails.className = 'hero-dashboard__item-details';
+        homeDetails.textContent = '+23';
+        
+        const homeDegrees = document.createElement('span');
+        homeDegrees.className = 'a11y-hidden';
+        homeDegrees.textContent = '°';
+        
+        homeDetails.appendChild(homeDegrees);
+        homeItem.appendChild(homeTitle);
+        homeItem.appendChild(homeDetails);
+        
+        const outsideItem = document.createElement('li');
+        outsideItem.className = 'hero-dashboard__item';
+        
+        const outsideTitle = document.createElement('div');
+        outsideTitle.className = 'hero-dashboard__item-title';
+        outsideTitle.textContent = 'За окном';
+        
+        const outsideDetails = document.createElement('div');
+        outsideDetails.className = 'hero-dashboard__item-details';
+        outsideDetails.textContent = '+19';
+        
+        const outsideDegrees = document.createElement('span');
+        outsideDegrees.className = 'a11y-hidden';
+        outsideDegrees.textContent = '°';
+        
+        const rainIcon = document.createElement('div');
+        rainIcon.className = 'hero-dashboard__icon hero-dashboard__icon_rain';
+        rainIcon.setAttribute('role', 'img');
+        rainIcon.setAttribute('aria-label', 'Дождь');
+        
+        outsideDetails.appendChild(outsideDegrees);
+        outsideDetails.appendChild(rainIcon);
+        outsideItem.appendChild(outsideTitle);
+        outsideItem.appendChild(outsideDetails);
+        
+        infoList.appendChild(homeItem);
+        infoList.appendChild(outsideItem);
+        
+        primaryDiv.appendChild(dashboardTitle);
+        primaryDiv.appendChild(dashboardSubtitle);
+        primaryDiv.appendChild(infoList);
+        
+        const scheduleList = document.createElement('ul');
+        scheduleList.className = 'hero-dashboard__schedule';
+        
+        const events = [
+            { icon: 'temp', iconLabel: 'Температура', title: 'Philips Cooler', subtitle: 'Начнет охлаждать в 16:30' },
+            { icon: 'light', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включится в 17:00' },
+            { icon: 'light', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включится в 17:00' }
+        ];
+        
+        events.forEach(event => {
+            scheduleList.appendChild(Event(event));
+        });
+        
+        heroDashboard.appendChild(primaryDiv);
+        heroDashboard.appendChild(scheduleList);
+        
+        generalSection.appendChild(generalTitle);
+        generalSection.appendChild(heroDashboard);
+        
+        const scriptsSection = document.createElement('section');
+        scriptsSection.className = 'section main__scripts';
+        
+        const scriptsTitle = document.createElement('h2');
+        scriptsTitle.className = 'section__title section__title-header';
+        scriptsTitle.textContent = 'Избранные сценарии';
+        
+        const eventGrid = document.createElement('ul');
+        eventGrid.className = 'event-grid';
+        
+        const slimEvents = [
+            { icon: 'light2', iconLabel: 'Освещение', title: 'Выключить весь свет в доме и во дворе', slim: true },
+            { icon: 'schedule', iconLabel: 'Расписание', title: 'Я ухожу', slim: true },
+            { icon: 'light2', iconLabel: 'Освещение', title: 'Включить свет в коридоре', slim: true },
+            { icon: 'temp2', iconLabel: 'Температура', title: 'Набрать горячую ванну', subtitle: 'Начнётся в 18:00', slim: true },
+            { icon: 'temp2', iconLabel: 'Температура', title: 'Сделать пол тёплым во всей квартире', slim: true }
+        ];
+        
+        slimEvents.forEach(event => {
+            eventGrid.appendChild(Event(event));
+        });
+        
+        scriptsSection.appendChild(scriptsTitle);
+        scriptsSection.appendChild(eventGrid);
+    
+        const devicesSection = document.createElement('section');
+        devicesSection.className = 'section main__devices';
+        
+        const devicesTitleDiv = document.createElement('div');
+        devicesTitleDiv.className = 'section__title';
+        
+        const devicesTitle = document.createElement('h2');
+        devicesTitle.className = 'section__title-header';
+        devicesTitle.textContent = 'Избранные устройства';
+        
+        const select = document.createElement('select');
+        select.className = 'section__select';
+        select.value = 'all';
+        
         TABS_KEYS.forEach(key => {
             const option = document.createElement('option');
             option.value = key;
             option.textContent = TABS[key].title;
             select.appendChild(option);
-
+        });
+        
+        const tabsList = document.createElement('ul');
+        tabsList.setAttribute('role', 'tablist');
+        tabsList.className = 'section__tabs';
+        
+        let activeTab = new URLSearchParams(window.location.search).get('tab') || 'all';
+        let hasRightScroll = false;
+        
+        TABS_KEYS.forEach(key => {
             const tab = document.createElement('li');
             tab.setAttribute('role', 'tab');
-            tab.setAttribute('aria-selected', key === activeTab);
+            tab.setAttribute('aria-selected', key === activeTab ? 'true' : 'false');
+            if (key === activeTab) tab.setAttribute('tabIndex', '0');
             tab.className = `section__tab${key === activeTab ? ' section__tab_active' : ''}`;
+            tab.id = `tab_${key}`;
+            tab.setAttribute('aria-controls', `panel_${key}`);
             tab.textContent = TABS[key].title;
             
             tab.addEventListener('click', () => {
                 activeTab = key;
                 updateTabs();
-                updatePanel();
+                updatePanels();
             });
             
             tabsList.appendChild(tab);
         });
-
-        const initPanel = () => {
+        
+        const panelWrapper = document.createElement('div');
+        panelWrapper.className = 'section__panel-wrapper';
+        
+        function updateTabs() {
+            tabsList.querySelectorAll('li').forEach(tab => {
+                const key = tab.id.replace('tab_', '');
+                const isActive = key === activeTab;
+                
+                tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                tab.className = `section__tab${isActive ? ' section__tab_active' : ''}`;
+                if (isActive) tab.setAttribute('tabIndex', '0');
+                else tab.removeAttribute('tabIndex');
+            });
+            
+            select.value = activeTab;
+        }
+        
+        function updatePanels() {
+            panelWrapper.querySelectorAll('.section__panel').forEach(panel => {
+                const key = panel.id.replace('panel_', '');
+                const isActive = key === activeTab;
+                
+                panel.setAttribute('aria-hidden', !isActive ? 'true' : 'false');
+                panel.className = `section__panel${!isActive ? ' section__panel_hidden' : ''}`;
+                
+                if (isActive) {
+                    const items = panel.querySelectorAll('.event');
+                    const sizes = Array.from(items).map(item => ({
+                        width: item.offsetWidth,
+                        height: item.offsetHeight
+                    }));
+                    
+                    const sumWidth = sizes.reduce((acc, item) => acc + item.width, 0);
+                    const newHasRightScroll = sumWidth > panelWrapper.offsetWidth;
+                    
+                    if (newHasRightScroll !== hasRightScroll) {
+                        hasRightScroll = newHasRightScroll;
+                        if (hasRightScroll) {
+                            const arrow = document.createElement('div');
+                            arrow.className = 'section__arrow';
+                            arrow.addEventListener('click', () => {
+                                panel.scrollBy({
+                                    left: 400,
+                                    behavior: 'smooth'
+                                });
+                            });
+                            panelWrapper.appendChild(arrow);
+                        } else {
+                            const arrow = panelWrapper.querySelector('.section__arrow');
+                            if (arrow) panelWrapper.removeChild(arrow);
+                        }
+                    }
+                }
+            });
+        }
+        
+        select.addEventListener('change', (e) => {
+            activeTab = e.target.value;
+            updateTabs();
+            updatePanels();
+        });
+        
+        TABS_KEYS.forEach(key => {
             const panel = document.createElement('div');
-            panel.className = 'section__panel';
             panel.setAttribute('role', 'tabpanel');
+            panel.className = `section__panel${key === activeTab ? '' : ' section__panel_hidden'}`;
+            panel.setAttribute('aria-hidden', key !== activeTab ? 'true' : 'false');
+            panel.id = `panel_${key}`;
+            panel.setAttribute('aria-labelledby', `tab_${key}`);
             
             const panelList = document.createElement('ul');
             panelList.className = 'section__panel-list';
             
-            const itemsToRender = TABS[activeTab].items.slice(0, 20);
-            itemsToRender.forEach(item => {
-                panelList.appendChild(createEvent(item));
+            const fragment = document.createDocumentFragment();
+            TABS[key].items.forEach(item => {
+                fragment.appendChild(Event(item));
             });
             
+            panelList.appendChild(fragment);
             panel.appendChild(panelList);
-            panelWrapper.innerHTML = '';
             panelWrapper.appendChild(panel);
-            
-            checkScrollArrow();
-        };
-
-        const checkScrollArrow = () => {
-            const panel = panelWrapper.querySelector('.section__panel');
-            if (!panel) return;
-            
-            const needsArrow = panel.scrollWidth > panelWrapper.offsetWidth;
-            
-            if (needsArrow && !hasRightScroll) {
-                const arrow = document.createElement('div');
-                arrow.className = 'section__arrow';
-                arrow.addEventListener('click', () => {
-                    panel.scrollBy({ left: 300, behavior: 'smooth' });
-                });
-                panelWrapper.appendChild(arrow);
-                hasRightScroll = true;
-            } else if (!needsArrow && hasRightScroll) {
-                const arrow = panelWrapper.querySelector('.section__arrow');
-                if (arrow) panelWrapper.removeChild(arrow);
-                hasRightScroll = false;
-            }
-        };
-
-        const updateTabs = () => {
-            document.querySelectorAll('.section__tab').forEach(tab => {
-                const isActive = tab.textContent === TABS[activeTab].title;
-                tab.className = `section__tab${isActive ? ' section__tab_active' : ''}`;
-                tab.setAttribute('aria-selected', isActive);
-            });
-            select.value = activeTab;
-        };
-
-        const updatePanel = () => {
-            initPanel();
-        };
-
-        const scheduleItems = [
-            { icon: 'temp', iconLabel: 'Температура', title: 'Philips Cooler', subtitle: 'Начнет охлаждать в 16:30' },
-            { icon: 'light', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включится в 17:00' }
-        ];
-
-        const scheduleList = document.querySelector('.hero-dashboard__schedule');
-        scheduleItems.forEach(item => {
-            scheduleList.appendChild(createEvent(item));
         });
-
-        const scenarioItems = [
-            { icon: 'light2', iconLabel: 'Освещение', title: 'Выключить весь свет', slim: true },
-            { icon: 'schedule', iconLabel: 'Расписание', title: 'Я ухожу', slim: true },
-            { icon: 'light2', iconLabel: 'Освещение', title: 'Включить свет в коридоре', slim: true },
-            { icon: 'temp2', iconLabel: 'Температура', title: 'Набрать ванну', subtitle: 'Начнётся в 18:00', slim: true }
-        ];
-
-        const eventGrid = document.querySelector('.event-grid');
-        scenarioItems.forEach(item => {
-            eventGrid.appendChild(createEvent(item));
-        });
-
-        initPanel();
-    };
-
-    if (document.readyState === 'complete') {
-        initSkeleton();
-        requestAnimationFrame(() => {
-            initApp();
-        });
-    } else {
-        initSkeleton();
-        document.addEventListener('DOMContentLoaded', () => {
-            requestAnimationFrame(() => {
-                initApp();
-            });
-        });
+        
+        devicesTitleDiv.appendChild(devicesTitle);
+        devicesTitleDiv.appendChild(select);
+        devicesTitleDiv.appendChild(tabsList);
+        
+        devicesSection.appendChild(devicesTitleDiv);
+        devicesSection.appendChild(panelWrapper);
+        
+        main.appendChild(generalSection);
+        main.appendChild(scriptsSection);
+        main.appendChild(devicesSection);
+        
+        updatePanels();
+        
+        return main;
     }
 
-    const preloadResources = () => {
-        const preloadFont = document.createElement('link');
-        preloadFont.rel = 'preload';
-        preloadFont.href = 'assets/lato.woff2';
-        preloadFont.as = 'font';
-        preloadFont.type = 'font/woff2';
-        preloadFont.crossOrigin = 'anonymous';
-        document.head.appendChild(preloadFont);
-    };
-
-    preloadResources();
+    document.addEventListener('DOMContentLoaded', () => {
+        app.appendChild(Header());
+        
+        setTimeout(() => {
+            const main = Main();
+            app.appendChild(main);
+            const fontLink = document.createElement('link');
+            fontLink.rel = 'preload';
+            fontLink.href = 'assets/lato.woff2';
+            fontLink.as = 'font';
+            fontLink.type = 'font/woff2';
+            fontLink.crossOrigin = 'anonymous';
+            document.head.appendChild(fontLink);
+        }, 50);
+    });
 })();
