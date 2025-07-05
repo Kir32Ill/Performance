@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-   
     const baseItems = [
         { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включено' },
         { icon: 'light', iconLabel: 'Освещение', title: 'D-Link Omna 180 Cam', subtitle: 'Включится в 17:00' },
@@ -88,15 +87,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderHeader() {
         const header = createElement('header', 'header');
-        
         const logoLink = createElement('a', 'header__logo', {
             'href': '/',
             'aria-label': 'Яндекс.Дом'
         });
         
         const menuButton = createElement('button', 'header__menu', {
-            'aria-expanded': state.expandedMenu,
-            'onclick': 'toggleMenu()'
+            'aria-expanded': state.expandedMenu
         });
         
         const menuText = createElement('span', 'header__menu-text a11y-hidden');
@@ -128,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderMain() {
         const main = createElement('main', 'main');
+        
         const generalSection = createElement('section', 'section main__general');
         generalSection.innerHTML = `
             <h2 class="section__title section__title-header section__main-title">Главное</h2>
@@ -212,6 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const panelWrapper = devicesSection.querySelector('.section__panel-wrapper');
         renderDevicePanels(panelWrapper);
+        
         main.append(generalSection, scriptsSection, devicesSection);
         return main;
     }
@@ -261,7 +260,42 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    window.toggleMenu = () => {
+    function setupTabHandlers() {
+        const select = document.querySelector('.section__select');
+        if (select) {
+            select.value = state.activeTab;
+            select.addEventListener('change', (e) => {
+                state.activeTab = e.target.value;
+                state.sizes = [];
+                const wrapper = document.querySelector('.section__panel-wrapper');
+                if (wrapper) renderDevicePanels(wrapper);
+                updateTabsUI();
+            });
+        }
+        
+        document.querySelectorAll('.section__tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                state.activeTab = tab.dataset.tab;
+                state.sizes = [];
+                const wrapper = document.querySelector('.section__panel-wrapper');
+                if (wrapper) renderDevicePanels(wrapper);
+                updateTabsUI();
+            });
+        });
+    }
+
+    function updateTabsUI() {
+        const select = document.querySelector('.section__select');
+        if (select) select.value = state.activeTab;
+        
+        document.querySelectorAll('.section__tab').forEach(tab => {
+            const isActive = tab.dataset.tab === state.activeTab;
+            tab.classList.toggle('section__tab_active', isActive);
+            tab.setAttribute('aria-selected', isActive);
+        });
+    }
+
+    function toggleMenu() {
         state.toggledMenu = true;
         state.expandedMenu = !state.expandedMenu;
         
@@ -278,39 +312,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 menuText.textContent = state.expandedMenu ? 'Закрыть меню' : 'Открыть меню';
             }
         }
-    };
-
-    function setupTabHandlers() {
-        const select = document.querySelector('.section__select');
-        if (select) {
-            select.value = state.activeTab;
-            select.addEventListener('change', (e) => {
-                state.activeTab = e.target.value;
-                state.sizes = [];
-                const wrapper = document.querySelector('.section__panel-wrapper');
-                if (wrapper) renderDevicePanels(wrapper);
-                updateTabsUI();
-            });
-        }
-        document.querySelectorAll('.section__tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                state.activeTab = tab.dataset.tab;
-                state.sizes = [];
-                const wrapper = document.querySelector('.section__panel-wrapper');
-                if (wrapper) renderDevicePanels(wrapper);
-                updateTabsUI();
-            });
-        });
-    }
-
-    function updateTabsUI() {
-        const select = document.querySelector('.section__select');
-        if (select) select.value = state.activeTab;
-        document.querySelectorAll('.section__tab').forEach(tab => {
-            const isActive = tab.dataset.tab === state.activeTab;
-            tab.classList.toggle('section__tab_active', isActive);
-            tab.setAttribute('aria-selected', isActive);
-        });
     }
 
     function init() {
@@ -320,6 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dom.app.appendChild(renderHeader());
         dom.app.appendChild(renderMain());
         
+        document.querySelector('.header__menu').addEventListener('click', toggleMenu);
         setupTabHandlers();
     }
 
