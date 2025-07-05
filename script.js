@@ -49,18 +49,11 @@
         }
     };
 
-    TABS.all.items = Array(64).fill().flatMap(() => TABS.all.items.slice(0, 8));
+    for (let i = 0; i < 6; i++) {
+        TABS.all.items = [...TABS.all.items, ...TABS.all.items];
+    }
 
     const TABS_KEYS = Object.keys(TABS);
-
-    function debounce(func, wait) {
-        let timeout;
-        return function() {
-            const context = this, args = arguments;
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(context, args), wait);
-        };
-    }
 
     function Event(props) {
         const li = document.createElement('li');
@@ -91,11 +84,11 @@
         li.appendChild(button);
         
         if (props.onSize) {
-            requestAnimationFrame(() => {
+            setTimeout(() => {
                 const width = li.offsetWidth;
                 const height = li.offsetHeight;
                 props.onSize({ width, height });
-            });
+            }, 0);
         }
         
         return li;
@@ -132,7 +125,6 @@
             { text: 'Сценарии', href: '/scripts' }
         ];
         
-        const linksFragment = document.createDocumentFragment();
         linksData.forEach(linkData => {
             const item = document.createElement('li');
             item.className = 'header__item';
@@ -144,16 +136,14 @@
             link.textContent = linkData.text;
             
             item.appendChild(link);
-            linksFragment.appendChild(item);
+            links.appendChild(item);
         });
-        
-        links.appendChild(linksFragment);
         
         menuButton.addEventListener('click', () => {
             if (!toggled) toggled = true;
             expanded = !expanded;
             
-            menuButton.setAttribute('aria-expanded', expanded.toString());
+            menuButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
             menuText.textContent = expanded ? 'Закрыть меню' : 'Открыть меню';
             
             links.className = `header__links${expanded ? ' header__links_opened' : ''}${toggled ? ' header__links-toggled' : ''}`;
@@ -247,17 +237,30 @@
         const scheduleList = document.createElement('ul');
         scheduleList.className = 'hero-dashboard__schedule';
         
-        const events = [
-            { icon: 'temp', iconLabel: 'Температура', title: 'Philips Cooler', subtitle: 'Начнет охлаждать в 16:30' },
-            { icon: 'light', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включится в 17:00' },
-            { icon: 'light', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включится в 17:00' }
-        ];
-        
-        const eventsFragment = document.createDocumentFragment();
-        events.forEach(event => {
-            eventsFragment.appendChild(Event(event));
+        const event1 = Event({
+            icon: 'temp',
+            iconLabel: 'Температура',
+            title: 'Philips Cooler',
+            subtitle: 'Начнет охлаждать в 16:30'
         });
-        scheduleList.appendChild(eventsFragment);
+        
+        const event2 = Event({
+            icon: 'light',
+            iconLabel: 'Освещение',
+            title: 'Xiaomi Yeelight LED Smart Bulb',
+            subtitle: 'Включится в 17:00'
+        });
+        
+        const event3 = Event({
+            icon: 'light',
+            iconLabel: 'Освещение',
+            title: 'Xiaomi Yeelight LED Smart Bulb',
+            subtitle: 'Включится в 17:00'
+        });
+        
+        scheduleList.appendChild(event1);
+        scheduleList.appendChild(event2);
+        scheduleList.appendChild(event3);
         
         heroDashboard.appendChild(primaryDiv);
         heroDashboard.appendChild(scheduleList);
@@ -283,11 +286,10 @@
             { icon: 'temp2', iconLabel: 'Температура', title: 'Сделать пол тёплым во всей квартире', slim: true }
         ];
         
-        const slimEventsFragment = document.createDocumentFragment();
         slimEvents.forEach(event => {
-            slimEventsFragment.appendChild(Event(event));
+            const slimEvent = Event(event);
+            eventGrid.appendChild(slimEvent);
         });
-        eventGrid.appendChild(slimEventsFragment);
         
         scriptsSection.appendChild(scriptsTitle);
         scriptsSection.appendChild(eventGrid);
@@ -306,14 +308,12 @@
         select.className = 'section__select';
         select.value = 'all';
         
-        const selectFragment = document.createDocumentFragment();
         TABS_KEYS.forEach(key => {
             const option = document.createElement('option');
             option.value = key;
             option.textContent = TABS[key].title;
-            selectFragment.appendChild(option);
+            select.appendChild(option);
         });
-        select.appendChild(selectFragment);
         
         const tabsList = document.createElement('ul');
         tabsList.setAttribute('role', 'tablist');
@@ -322,7 +322,6 @@
         let activeTab = new URLSearchParams(window.location.search).get('tab') || 'all';
         let hasRightScroll = false;
         
-        const tabsFragment = document.createDocumentFragment();
         TABS_KEYS.forEach(key => {
             const tab = document.createElement('li');
             tab.setAttribute('role', 'tab');
@@ -339,9 +338,8 @@
                 updatePanels();
             });
             
-            tabsFragment.appendChild(tab);
+            tabsList.appendChild(tab);
         });
-        tabsList.appendChild(tabsFragment);
         
         const panelWrapper = document.createElement('div');
         panelWrapper.className = 'section__panel-wrapper';
@@ -351,7 +349,7 @@
                 const key = tab.id.replace('tab_', '');
                 const isActive = key === activeTab;
                 
-                tab.setAttribute('aria-selected', isActive.toString());
+                tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
                 tab.className = `section__tab${isActive ? ' section__tab_active' : ''}`;
                 if (isActive) tab.setAttribute('tabIndex', '0');
                 else tab.removeAttribute('tabIndex');
@@ -360,33 +358,44 @@
             select.value = activeTab;
         }
         
-        const updatePanels = debounce(function() {
-            const activePanel = panelWrapper.querySelector(`#panel_${activeTab}`);
-            if (!activePanel) return;
-
-            const items = activePanel.querySelectorAll('.event');
-            const sumWidth = Array.from(items).reduce((acc, item) => acc + item.offsetWidth, 0);
-            const newHasRightScroll = sumWidth > panelWrapper.offsetWidth;
-
-            if (newHasRightScroll !== hasRightScroll) {
-                hasRightScroll = newHasRightScroll;
-                const arrow = panelWrapper.querySelector('.section__arrow');
+        function updatePanels() {
+            panelWrapper.querySelectorAll('.section__panel').forEach(panel => {
+                const key = panel.id.replace('panel_', '');
+                const isActive = key === activeTab;
                 
-                if (hasRightScroll && !arrow) {
-                    const arrow = document.createElement('div');
-                    arrow.className = 'section__arrow';
-                    arrow.addEventListener('click', () => {
-                        activePanel.scrollBy({
-                            left: 400,
-                            behavior: 'smooth'
-                        });
-                    });
-                    panelWrapper.appendChild(arrow);
-                } else if (!hasRightScroll && arrow) {
-                    panelWrapper.removeChild(arrow);
+                panel.setAttribute('aria-hidden', !isActive ? 'true' : 'false');
+                panel.className = `section__panel${!isActive ? ' section__panel_hidden' : ''}`;
+                
+                if (isActive) {
+                    const items = panel.querySelectorAll('.event');
+                    const sizes = Array.from(items).map(item => ({
+                        width: item.offsetWidth,
+                        height: item.offsetHeight
+                    }));
+                    
+                    const sumWidth = sizes.reduce((acc, item) => acc + item.width, 0);
+                    const newHasRightScroll = sumWidth > panelWrapper.offsetWidth;
+                    
+                    if (newHasRightScroll !== hasRightScroll) {
+                        hasRightScroll = newHasRightScroll;
+                        if (hasRightScroll) {
+                            const arrow = document.createElement('div');
+                            arrow.className = 'section__arrow';
+                            arrow.addEventListener('click', () => {
+                                panel.scrollBy({
+                                    left: 400,
+                                    behavior: 'smooth'
+                                });
+                            });
+                            panelWrapper.appendChild(arrow);
+                        } else {
+                            const arrow = panelWrapper.querySelector('.section__arrow');
+                            if (arrow) panelWrapper.removeChild(arrow);
+                        }
+                    }
                 }
-            }
-        }, 100);
+            });
+        }
         
         select.addEventListener('change', (e) => {
             activeTab = e.target.value;
@@ -394,7 +403,6 @@
             updatePanels();
         });
         
-        const panelsFragment = document.createDocumentFragment();
         TABS_KEYS.forEach(key => {
             const panel = document.createElement('div');
             panel.setAttribute('role', 'tabpanel');
@@ -406,16 +414,13 @@
             const panelList = document.createElement('ul');
             panelList.className = 'section__panel-list';
             
-            const itemsFragment = document.createDocumentFragment();
             TABS[key].items.forEach(item => {
-                itemsFragment.appendChild(Event(item));
+                panelList.appendChild(Event(item));
             });
             
-            panelList.appendChild(itemsFragment);
             panel.appendChild(panelList);
-            panelsFragment.appendChild(panel);
+            panelWrapper.appendChild(panel);
         });
-        panelWrapper.appendChild(panelsFragment);
         
         devicesTitleDiv.appendChild(devicesTitle);
         devicesTitleDiv.appendChild(select);
@@ -423,25 +428,19 @@
         
         devicesSection.appendChild(devicesTitleDiv);
         devicesSection.appendChild(panelWrapper);
-        
         main.appendChild(generalSection);
         main.appendChild(scriptsSection);
         main.appendChild(devicesSection);
         
         updatePanels();
         
-        window.addEventListener('resize', debounce(updatePanels, 100));
-        
         return main;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        const appFragment = document.createDocumentFragment();
-        appFragment.appendChild(Header());
-        appFragment.appendChild(Main());
-        
-        requestAnimationFrame(() => {
-            app.appendChild(appFragment);
-        });
+        setTimeout(() => {
+            app.appendChild(Header());
+            app.appendChild(Main());
+        }, 100);
     });
 })();
