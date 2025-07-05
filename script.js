@@ -15,7 +15,7 @@
 
         return React.createElement("li", {
             ref: ref,
-            className: `event${props.slim ? " event_slim" : ""}`
+            className: props.slim ? "event event_slim" : "event"
         },
             React.createElement("button", { className: "event__button" }, [
                 React.createElement("span", {
@@ -32,102 +32,50 @@
     const TABS = {
         all: {
             title: 'Все',
-            items: Array(48).fill().flatMap((_, i) => [
-                {
-                    icon: 'light2',
-                    iconLabel: 'Освещение',
-                    title: 'Xiaomi Yeelight LED Smart Bulb',
-                    subtitle: 'Включено'
-                },
-                {
-                    icon: 'light',
-                    iconLabel: 'Освещение',
-                    title: 'D-Link Omna 180 Cam',
-                    subtitle: 'Включится в 17:00'
-                },
-                {
-                    icon: 'temp',
-                    iconLabel: 'Температура',
-                    title: 'Elgato Eve Degree Connected',
-                    subtitle: 'Выключено до 17:00'
-                }
-            ]).slice(0, 48)
+            items: [
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включено' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'D-Link Omna 180 Cam', subtitle: 'Включится в 17:00' },
+                { icon: 'temp', iconLabel: 'Температура', title: 'Elgato Eve Degree Connected', subtitle: 'Выключено до 17:00' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'LIFX Mini Day & Dusk A60 E27', subtitle: 'Включится в 17:00' },
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Mi Air Purifier 2S', subtitle: 'Включено' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'Philips Zhirui', subtitle: 'Включено' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'Philips Zhirui', subtitle: 'Включено' },
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Mi Air Purifier 2S', subtitle: 'Включено' }
+            ]
         },
         kitchen: {
             title: 'Кухня',
             items: [
-                {
-                    icon: 'light2',
-                    iconLabel: 'Освещение',
-                    title: 'Xiaomi Yeelight LED Smart Bulb',
-                    subtitle: 'Включено'
-                },
-                {
-                    icon: 'temp',
-                    iconLabel: 'Температура',
-                    title: 'Elgato Eve Degree Connected',
-                    subtitle: 'Выключено до 17:00'
-                }
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включено' },
+                { icon: 'temp', iconLabel: 'Температура', title: 'Elgato Eve Degree Connected', subtitle: 'Выключено до 17:00' }
             ]
         },
         hall: {
             title: 'Зал',
             items: [
-                {
-                    icon: 'light',
-                    iconLabel: 'Освещение',
-                    title: 'Philips Zhirui',
-                    subtitle: 'Выключено'
-                },
-                {
-                    icon: 'light2',
-                    iconLabel: 'Освещение',
-                    title: 'Xiaomi Mi Air Purifier 2S',
-                    subtitle: 'Выключено'
-                }
+                { icon: 'light', iconLabel: 'Освещение', title: 'Philips Zhirui', subtitle: 'Выключено' },
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Mi Air Purifier 2S', subtitle: 'Выключено' }
             ]
         },
         lights: {
             title: 'Лампочки',
             items: [
-                {
-                    icon: 'light',
-                    iconLabel: 'Освещение',
-                    title: 'D-Link Omna 180 Cam',
-                    subtitle: 'Включится в 17:00'
-                },
-                {
-                    icon: 'light',
-                    iconLabel: 'Освещение',
-                    title: 'LIFX Mini Day & Dusk A60 E27',
-                    subtitle: 'Включится в 17:00'
-                },
-                {
-                    icon: 'light2',
-                    iconLabel: 'Освещение',
-                    title: 'Xiaomi Mi Air Purifier 2S',
-                    subtitle: 'Включено'
-                },
-                {
-                    icon: 'light',
-                    iconLabel: 'Освещение',
-                    title: 'Philips Zhirui',
-                    subtitle: 'Включено'
-                }
+                { icon: 'light', iconLabel: 'Освещение', title: 'D-Link Omna 180 Cam', subtitle: 'Включится в 17:00' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'LIFX Mini Day & Dusk A60 E27', subtitle: 'Включится в 17:00' },
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Mi Air Purifier 2S', subtitle: 'Включено' },
+                { icon: 'light', iconLabel: 'Освещение', title: 'Philips Zhirui', subtitle: 'Включено' }
             ]
         },
         cameras: {
             title: 'Камеры',
             items: [
-                {
-                    icon: 'light2',
-                    iconLabel: 'Освещение',
-                    title: 'Xiaomi Mi Air Purifier 2S',
-                    subtitle: 'Включено'
-                }
+                { icon: 'light2', iconLabel: 'Освещение', title: 'Xiaomi Mi Air Purifier 2S', subtitle: 'Включено' }
             ]
         }
     };
+    for (let i = 0; i < 6; i++) {
+        TABS.all.items = [...TABS.all.items, ...TABS.all.items];
+    }
 
     const TABS_KEYS = Object.keys(TABS);
 
@@ -183,7 +131,8 @@
         React.useEffect(() => {
             if (!activeTab && !initedRef.current) {
                 initedRef.current = true;
-                setActiveTab(new URLSearchParams(window.location.search).get('tab') || 'all');
+                const params = new URLSearchParams(window.location.search);
+                setActiveTab(params.get('tab') || 'all');
             }
         }, [activeTab]);
 
@@ -316,7 +265,10 @@
                     }, TABS_KEYS.map(key =>
                         React.createElement("option", { key: key, value: key }, TABS[key].title)
                     )),
-                    React.createElement("ul", { role: "tablist", className: "section__tabs" }, TABS_KEYS.map(key =>
+                    React.createElement("ul", { 
+                        role: "tablist", 
+                        className: "section__tabs" 
+                    }, TABS_KEYS.map(key =>
                         React.createElement("li", {
                             key: key,
                             role: "tab",
