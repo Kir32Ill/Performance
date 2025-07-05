@@ -17,7 +17,7 @@
             ref: ref,
             className: props.slim ? "event event_slim" : "event"
         },
-            React.createElement("button", { className: "event__button" }, [
+            React.createElement("button", { className: "event__button" },
                 React.createElement("span", {
                     className: `event__icon event__icon_${props.icon}`,
                     role: "img",
@@ -25,7 +25,7 @@
                 }),
                 React.createElement("h4", { className: "event__title" }, props.title),
                 props.subtitle && React.createElement("span", { className: "event__subtitle" }, props.subtitle)
-            ])
+            )
         );
     });
 
@@ -73,6 +73,7 @@
             ]
         }
     };
+
     for (let i = 0; i < 6; i++) {
         TABS.all.items = [...TABS.all.items, ...TABS.all.items];
     }
@@ -88,7 +89,7 @@
             setExpanded(!expanded);
         };
 
-        return React.createElement("header", { className: "header" }, [
+        return React.createElement("header", { className: "header" },
             React.createElement("a", {
                 href: "/",
                 className: "header__logo",
@@ -96,14 +97,15 @@
             }),
             React.createElement("button", {
                 className: "header__menu",
-                "aria-expanded": expanded,
+                "aria-expanded": expanded ? "true" : "false",
                 onClick: onClick
-            }, React.createElement("span", {
-                className: "header__menu-text a11y-hidden"
-            }, expanded ? "Закрыть меню" : "Открыть меню")),
+            },
+                React.createElement("span", { className: "header__menu-text a11y-hidden" },
+                    expanded ? "Закрыть меню" : "Открыть меню")
+            ),
             React.createElement("ul", {
                 className: `header__links${expanded ? " header__links_opened" : ""}${toggled ? " header__links-toggled" : ""}`
-            }, [
+            },
                 React.createElement("li", { className: "header__item" },
                     React.createElement("a", {
                         className: "header__link header__link_current",
@@ -117,8 +119,8 @@
                 React.createElement("li", { className: "header__item" },
                     React.createElement("a", { className: "header__link", href: "/scripts" }, "Сценарии")
                 )
-            ])
-        ]);
+            )
+        );
     }
 
     function Main() {
@@ -140,9 +142,9 @@
             setActiveTab(event.target.value);
         };
 
-        const onSize = size => {
+        const onSize = React.useCallback(size => {
             setSizes(prev => [...prev, size]);
-        };
+        }, []);
 
         React.useEffect(() => {
             if (!ref.current || sizes.length === 0) return;
@@ -282,23 +284,25 @@
                     ))
                 ]),
                 React.createElement("div", { className: "section__panel-wrapper", ref: ref }, [
-                    TABS_KEYS.map(key =>
+                    ...TABS_KEYS.map(key =>
                         React.createElement("div", {
                             key: key,
                             role: "tabpanel",
                             className: `section__panel${key === activeTab ? "" : " section__panel_hidden"}`,
-                            "aria-hidden": key !== activeTab,
+                            "aria-hidden": key !== activeTab ? "true" : "false",
                             id: `panel_${key}`,
                             "aria-labelledby": `tab_${key}`
-                        }, React.createElement("ul", { className: "section__panel-list" },
-                            TABS[key].items.map((item, index) =>
-                                React.createElement(Event, {
-                                    key: index,
-                                    ...item,
-                                    onSize: key === activeTab ? onSize : undefined
-                                })
+                        }, 
+                            React.createElement("ul", { className: "section__panel-list" },
+                                TABS[key].items.map((item, index) =>
+                                    React.createElement(Event, {
+                                        key: index,
+                                        ...item,
+                                        onSize: key === activeTab ? onSize : undefined
+                                    })
+                                )
                             )
-                        ))
+                        )
                     ),
                     hasRightScroll && React.createElement("div", {
                         className: "section__arrow",
@@ -312,10 +316,10 @@
     document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
             const root = ReactDOM.createRoot(document.getElementById('app'));
-            root.render(React.createElement(React.Fragment, null, [
+            root.render(React.createElement(React.Fragment, null,
                 React.createElement(Header),
                 React.createElement(Main)
-            ]));
+            ));
         }, 100);
     });
 })();
