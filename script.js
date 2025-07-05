@@ -49,38 +49,17 @@
         }
     };
 
-    for (let i = 0; i < 6; i++) {
-        TABS.all.items = [...TABS.all.items, ...TABS.all.items];
-    }
+    TABS.all.items = Array(64).fill().flatMap(() => TABS.all.items.slice(0, 8));
 
     const TABS_KEYS = Object.keys(TABS);
 
-    function createElement(tag, attrs, ...children) {
-        const element = document.createElement(tag);
-        
-        if (attrs) {
-            for (const [key, value] of Object.entries(attrs)) {
-                if (key === 'className') {
-                    element.className = value;
-                } else if (key.startsWith('on')) {
-                    element.addEventListener(key.substring(2).toLowerCase(), value);
-                } else {
-                    element.setAttribute(key, value);
-                }
-            }
-        }
-        
-        children.forEach(child => {
-            if (typeof child === 'string') {
-                element.appendChild(document.createTextNode(child));
-            } else if (Array.isArray(child)) {
-                child.forEach(nestedChild => element.appendChild(nestedChild));
-            } else if (child) {
-                element.appendChild(child);
-            }
-        });
-        
-        return element;
+    function debounce(func, wait) {
+        let timeout;
+        return function() {
+            const context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(context, args), wait);
+        };
     }
 
     function Event(props) {
@@ -112,11 +91,11 @@
         li.appendChild(button);
         
         if (props.onSize) {
-            setTimeout(() => {
+            requestAnimationFrame(() => {
                 const width = li.offsetWidth;
                 const height = li.offsetHeight;
                 props.onSize({ width, height });
-            }, 0);
+            });
         }
         
         return li;
@@ -153,6 +132,7 @@
             { text: 'Сценарии', href: '/scripts' }
         ];
         
+        const linksFragment = document.createDocumentFragment();
         linksData.forEach(linkData => {
             const item = document.createElement('li');
             item.className = 'header__item';
@@ -164,14 +144,16 @@
             link.textContent = linkData.text;
             
             item.appendChild(link);
-            links.appendChild(item);
+            linksFragment.appendChild(item);
         });
+        
+        links.appendChild(linksFragment);
         
         menuButton.addEventListener('click', () => {
             if (!toggled) toggled = true;
             expanded = !expanded;
             
-            menuButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            menuButton.setAttribute('aria-expanded', expanded.toString());
             menuText.textContent = expanded ? 'Закрыть меню' : 'Открыть меню';
             
             links.className = `header__links${expanded ? ' header__links_opened' : ''}${toggled ? ' header__links-toggled' : ''}`;
@@ -187,7 +169,6 @@
     function Main() {
         const main = document.createElement('main');
         main.className = 'main';
-    
         const generalSection = document.createElement('section');
         generalSection.className = 'section main__general';
         
@@ -266,30 +247,17 @@
         const scheduleList = document.createElement('ul');
         scheduleList.className = 'hero-dashboard__schedule';
         
-        const event1 = Event({
-            icon: 'temp',
-            iconLabel: 'Температура',
-            title: 'Philips Cooler',
-            subtitle: 'Начнет охлаждать в 16:30'
-        });
+        const events = [
+            { icon: 'temp', iconLabel: 'Температура', title: 'Philips Cooler', subtitle: 'Начнет охлаждать в 16:30' },
+            { icon: 'light', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включится в 17:00' },
+            { icon: 'light', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включится в 17:00' }
+        ];
         
-        const event2 = Event({
-            icon: 'light',
-            iconLabel: 'Освещение',
-            title: 'Xiaomi Yeelight LED Smart Bulb',
-            subtitle: 'Включится в 17:00'
+        const eventsFragment = document.createDocumentFragment();
+        events.forEach(event => {
+            eventsFragment.appendChild(Event(event));
         });
-        
-        const event3 = Event({
-            icon: 'light',
-            iconLabel: 'Освещение',
-            title: 'Xiaomi Yeelight LED Smart Bulb',
-            subtitle: 'Включится в 17:00'
-        });
-        
-        scheduleList.appendChild(event1);
-        scheduleList.appendChild(event2);
-        scheduleList.appendChild(event3);
+        scheduleList.appendChild(eventsFragment);
         
         heroDashboard.appendChild(primaryDiv);
         heroDashboard.appendChild(scheduleList);
@@ -308,17 +276,18 @@
         eventGrid.className = 'event-grid';
         
         const slimEvents = [
-            { icon: 'light2', iconLabel: 'Освещение', title: 'Выключить весь свет в доме и во дворе' },
-            { icon: 'schedule', iconLabel: 'Расписание', title: 'Я ухожу' },
-            { icon: 'light2', iconLabel: 'Освещение', title: 'Включить свет в коридоре' },
-            { icon: 'temp2', iconLabel: 'Температура', title: 'Набрать горячую ванну', subtitle: 'Начнётся в 18:00' },
-            { icon: 'temp2', iconLabel: 'Температура', title: 'Сделать пол тёплым во всей квартире' }
+            { icon: 'light2', iconLabel: 'Освещение', title: 'Выключить весь свет в доме и во дворе', slim: true },
+            { icon: 'schedule', iconLabel: 'Расписание', title: 'Я ухожу', slim: true },
+            { icon: 'light2', iconLabel: 'Освещение', title: 'Включить свет в коридоре', slim: true },
+            { icon: 'temp2', iconLabel: 'Температура', title: 'Набрать горячую ванну', subtitle: 'Начнётся в 18:00', slim: true },
+            { icon: 'temp2', iconLabel: 'Температура', title: 'Сделать пол тёплым во всей квартире', slim: true }
         ];
         
+        const slimEventsFragment = document.createDocumentFragment();
         slimEvents.forEach(event => {
-            const slimEvent = Event({ ...event, slim: true });
-            eventGrid.appendChild(slimEvent);
+            slimEventsFragment.appendChild(Event(event));
         });
+        eventGrid.appendChild(slimEventsFragment);
         
         scriptsSection.appendChild(scriptsTitle);
         scriptsSection.appendChild(eventGrid);
@@ -337,19 +306,23 @@
         select.className = 'section__select';
         select.value = 'all';
         
+        const selectFragment = document.createDocumentFragment();
         TABS_KEYS.forEach(key => {
             const option = document.createElement('option');
             option.value = key;
             option.textContent = TABS[key].title;
-            select.appendChild(option);
+            selectFragment.appendChild(option);
         });
+        select.appendChild(selectFragment);
         
         const tabsList = document.createElement('ul');
         tabsList.setAttribute('role', 'tablist');
         tabsList.className = 'section__tabs';
         
         let activeTab = new URLSearchParams(window.location.search).get('tab') || 'all';
+        let hasRightScroll = false;
         
+        const tabsFragment = document.createDocumentFragment();
         TABS_KEYS.forEach(key => {
             const tab = document.createElement('li');
             tab.setAttribute('role', 'tab');
@@ -366,21 +339,19 @@
                 updatePanels();
             });
             
-            tabsList.appendChild(tab);
+            tabsFragment.appendChild(tab);
         });
+        tabsList.appendChild(tabsFragment);
         
         const panelWrapper = document.createElement('div');
         panelWrapper.className = 'section__panel-wrapper';
-        
-        let hasRightScroll = false;
-        const sizes = [];
         
         function updateTabs() {
             tabsList.querySelectorAll('li').forEach(tab => {
                 const key = tab.id.replace('tab_', '');
                 const isActive = key === activeTab;
                 
-                tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                tab.setAttribute('aria-selected', isActive.toString());
                 tab.className = `section__tab${isActive ? ' section__tab_active' : ''}`;
                 if (isActive) tab.setAttribute('tabIndex', '0');
                 else tab.removeAttribute('tabIndex');
@@ -389,56 +360,41 @@
             select.value = activeTab;
         }
         
-        function updatePanels() {
-            panelWrapper.querySelectorAll('.section__panel').forEach(panel => {
-                const key = panel.id.replace('panel_', '');
-                const isActive = key === activeTab;
+        const updatePanels = debounce(function() {
+            const activePanel = panelWrapper.querySelector(`#panel_${activeTab}`);
+            if (!activePanel) return;
+
+            const items = activePanel.querySelectorAll('.event');
+            const sumWidth = Array.from(items).reduce((acc, item) => acc + item.offsetWidth, 0);
+            const newHasRightScroll = sumWidth > panelWrapper.offsetWidth;
+
+            if (newHasRightScroll !== hasRightScroll) {
+                hasRightScroll = newHasRightScroll;
+                const arrow = panelWrapper.querySelector('.section__arrow');
                 
-                panel.setAttribute('aria-hidden', !isActive ? 'true' : 'false');
-                panel.className = `section__panel${!isActive ? ' section__panel_hidden' : ''}`;
-                
-                if (isActive) {
-                    sizes.length = 0;
-                    const items = panel.querySelectorAll('.event');
-                    items.forEach(item => {
-                        const width = item.offsetWidth;
-                        const height = item.offsetHeight;
-                        sizes.push({ width, height });
+                if (hasRightScroll && !arrow) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'section__arrow';
+                    arrow.addEventListener('click', () => {
+                        activePanel.scrollBy({
+                            left: 400,
+                            behavior: 'smooth'
+                        });
                     });
-                    
-                    const sumWidth = sizes.reduce((acc, item) => acc + item.width, 0);
-                    const newHasRightScroll = sumWidth > panelWrapper.offsetWidth;
-                    
-                    if (newHasRightScroll !== hasRightScroll) {
-                        hasRightScroll = newHasRightScroll;
-                        if (hasRightScroll) {
-                            const arrow = document.createElement('div');
-                            arrow.className = 'section__arrow';
-                            arrow.addEventListener('click', () => {
-                                const scroller = panelWrapper.querySelector('.section__panel:not(.section__panel_hidden)');
-                                if (scroller) {
-                                    scroller.scrollTo({
-                                        left: scroller.scrollLeft + 400,
-                                        behavior: 'smooth'
-                                    });
-                                }
-                            });
-                            panelWrapper.appendChild(arrow);
-                        } else {
-                            const arrow = panelWrapper.querySelector('.section__arrow');
-                            if (arrow) panelWrapper.removeChild(arrow);
-                        }
-                    }
+                    panelWrapper.appendChild(arrow);
+                } else if (!hasRightScroll && arrow) {
+                    panelWrapper.removeChild(arrow);
                 }
-            });
-        }
+            }
+        }, 100);
         
-        select.addEventListener('input', (e) => {
+        select.addEventListener('change', (e) => {
             activeTab = e.target.value;
             updateTabs();
             updatePanels();
         });
         
+        const panelsFragment = document.createDocumentFragment();
         TABS_KEYS.forEach(key => {
             const panel = document.createElement('div');
             panel.setAttribute('role', 'tabpanel');
@@ -450,42 +406,16 @@
             const panelList = document.createElement('ul');
             panelList.className = 'section__panel-list';
             
-            TABS[key].items.forEach((item, index) => {
-                const event = Event({
-                    ...item,
-                    onSize: key === activeTab ? (size) => {
-                        sizes.push(size);
-                        const sumWidth = sizes.reduce((acc, item) => acc + item.width, 0);
-                        const newHasRightScroll = sumWidth > panelWrapper.offsetWidth;
-                        
-                        if (newHasRightScroll !== hasRightScroll) {
-                            hasRightScroll = newHasRightScroll;
-                            if (hasRightScroll) {
-                                const arrow = document.createElement('div');
-                                arrow.className = 'section__arrow';
-                                arrow.addEventListener('click', () => {
-                                    const scroller = panelWrapper.querySelector('.section__panel:not(.section__panel_hidden)');
-                                    if (scroller) {
-                                        scroller.scrollTo({
-                                            left: scroller.scrollLeft + 400,
-                                            behavior: 'smooth'
-                                        });
-                                    }
-                                });
-                                panelWrapper.appendChild(arrow);
-                            } else {
-                                const arrow = panelWrapper.querySelector('.section__arrow');
-                                if (arrow) panelWrapper.removeChild(arrow);
-                            }
-                        }
-                    } : undefined
-                });
-                panelList.appendChild(event);
+            const itemsFragment = document.createDocumentFragment();
+            TABS[key].items.forEach(item => {
+                itemsFragment.appendChild(Event(item));
             });
             
+            panelList.appendChild(itemsFragment);
             panel.appendChild(panelList);
-            panelWrapper.appendChild(panel);
+            panelsFragment.appendChild(panel);
         });
+        panelWrapper.appendChild(panelsFragment);
         
         devicesTitleDiv.appendChild(devicesTitle);
         devicesTitleDiv.appendChild(select);
@@ -497,16 +427,21 @@
         main.appendChild(generalSection);
         main.appendChild(scriptsSection);
         main.appendChild(devicesSection);
-    
+        
         updatePanels();
+        
+        window.addEventListener('resize', debounce(updatePanels, 100));
         
         return main;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            app.appendChild(Header());
-            app.appendChild(Main());
-        }, 100);
+        const appFragment = document.createDocumentFragment();
+        appFragment.appendChild(Header());
+        appFragment.appendChild(Main());
+        
+        requestAnimationFrame(() => {
+            app.appendChild(appFragment);
+        });
     });
 })();
