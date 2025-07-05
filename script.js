@@ -1,9 +1,7 @@
 (function() {
     "use strict";
-
     const app = document.getElementById('app');
     if (!app) return;
-
     const TABS = {
         all: {
             title: 'Все',
@@ -48,6 +46,7 @@
             ]
         }
     };
+
     for (let i = 0; i < 6; i++) {
         TABS.all.items = [...TABS.all.items, ...TABS.all.items];
     }
@@ -80,7 +79,6 @@
         
         return element;
     }
-
     function Event(props) {
         const li = document.createElement('li');
         li.className = props.slim ? 'event event_slim' : 'event';
@@ -126,11 +124,12 @@
         
         const header = document.createElement('header');
         header.className = 'header';
-        
+    
         const logo = document.createElement('a');
         logo.href = '/';
         logo.className = 'header__logo';
         logo.setAttribute('aria-label', 'Яндекс.Дом');
+        header.appendChild(logo);
         
         const menuButton = document.createElement('button');
         menuButton.className = 'header__menu';
@@ -139,7 +138,6 @@
         const menuText = document.createElement('span');
         menuText.className = 'header__menu-text a11y-hidden';
         menuText.textContent = 'Открыть меню';
-        
         menuButton.appendChild(menuText);
         
         const links = document.createElement('ul');
@@ -175,46 +173,62 @@
             links.className = `header__links${expanded ? ' header__links_opened' : ''}${toggled ? ' header__links-toggled' : ''}`;
         });
         
-        header.appendChild(logo);
         header.appendChild(menuButton);
         header.appendChild(links);
         
         return header;
     }
-
     function Main() {
         const main = document.createElement('main');
         main.className = 'main';
-        const generalSection = document.createElement('section');
-        generalSection.className = 'section main__general';
         
-        const generalTitle = document.createElement('h2');
-        generalTitle.className = 'section__title section__title-header section__main-title';
-        generalTitle.textContent = 'Главное';
+        const generalSection = createGeneralSection();
+        main.appendChild(generalSection);
         
-        const heroDashboard = document.createElement('div');
-        heroDashboard.className = 'hero-dashboard';
+        const scriptsSection = createScriptsSection();
+        main.appendChild(scriptsSection);
         
-        const primaryDiv = document.createElement('div');
-        primaryDiv.className = 'hero-dashboard__primary';
+        const devicesSection = createDevicesSection();
+        main.appendChild(devicesSection);
+        
+        return main;
+    }
+
+    function createGeneralSection() {
+        const section = document.createElement('section');
+        section.className = 'section main__general';
+        
+        const title = document.createElement('h2');
+        title.className = 'section__title section__title-header section__main-title';
+        title.textContent = 'Главное';
+        section.appendChild(title);
+        
+        const dashboard = document.createElement('div');
+        dashboard.className = 'hero-dashboard';
+        
+        const primary = document.createElement('div');
+        primary.className = 'hero-dashboard__primary';
         
         const dashboardTitle = document.createElement('h3');
         dashboardTitle.className = 'hero-dashboard__title';
         dashboardTitle.textContent = 'Привет, Геннадий!';
+        primary.appendChild(dashboardTitle);
         
         const dashboardSubtitle = document.createElement('p');
         dashboardSubtitle.className = 'hero-dashboard__subtitle';
-        dashboardSubtitle.textContent = 'Двери и окна закрыты, сигнализация включена.';
+        dashboardSubtitle.textContent = 'Двери и окна закрыты, сигализация включена.';
+        primary.appendChild(dashboardSubtitle);
         
         const infoList = document.createElement('ul');
         infoList.className = 'hero-dashboard__info';
-        
+    
         const homeItem = document.createElement('li');
         homeItem.className = 'hero-dashboard__item';
         
         const homeTitle = document.createElement('div');
         homeTitle.className = 'hero-dashboard__item-title';
         homeTitle.textContent = 'Дома';
+        homeItem.appendChild(homeTitle);
         
         const homeDetails = document.createElement('div');
         homeDetails.className = 'hero-dashboard__item-details';
@@ -223,10 +237,10 @@
         const homeDegrees = document.createElement('span');
         homeDegrees.className = 'a11y-hidden';
         homeDegrees.textContent = '°';
-        
         homeDetails.appendChild(homeDegrees);
-        homeItem.appendChild(homeTitle);
+        
         homeItem.appendChild(homeDetails);
+        infoList.appendChild(homeItem);
         
         const outsideItem = document.createElement('li');
         outsideItem.className = 'hero-dashboard__item';
@@ -234,6 +248,7 @@
         const outsideTitle = document.createElement('div');
         outsideTitle.className = 'hero-dashboard__item-title';
         outsideTitle.textContent = 'За окном';
+        outsideItem.appendChild(outsideTitle);
         
         const outsideDetails = document.createElement('div');
         outsideDetails.className = 'hero-dashboard__item-details';
@@ -242,93 +257,79 @@
         const outsideDegrees = document.createElement('span');
         outsideDegrees.className = 'a11y-hidden';
         outsideDegrees.textContent = '°';
+        outsideDetails.appendChild(outsideDegrees);
         
         const rainIcon = document.createElement('div');
         rainIcon.className = 'hero-dashboard__icon hero-dashboard__icon_rain';
         rainIcon.setAttribute('role', 'img');
         rainIcon.setAttribute('aria-label', 'Дождь');
-        
-        outsideDetails.appendChild(outsideDegrees);
         outsideDetails.appendChild(rainIcon);
-        outsideItem.appendChild(outsideTitle);
-        outsideItem.appendChild(outsideDetails);
         
-        infoList.appendChild(homeItem);
+        outsideItem.appendChild(outsideDetails);
         infoList.appendChild(outsideItem);
         
-        primaryDiv.appendChild(dashboardTitle);
-        primaryDiv.appendChild(dashboardSubtitle);
-        primaryDiv.appendChild(infoList);
+        primary.appendChild(infoList);
+        dashboard.appendChild(primary);
         
         const scheduleList = document.createElement('ul');
         scheduleList.className = 'hero-dashboard__schedule';
         
-        const event1 = Event({
-            icon: 'temp',
-            iconLabel: 'Температура',
-            title: 'Philips Cooler',
-            subtitle: 'Начнет охлаждать в 16:30'
+        const events = [
+            { icon: 'temp', iconLabel: 'Температура', title: 'Philips Cooler', subtitle: 'Начнет охлаждать в 16:30' },
+            { icon: 'light', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включится в 17:00' },
+            { icon: 'light', iconLabel: 'Освещение', title: 'Xiaomi Yeelight LED Smart Bulb', subtitle: 'Включится в 17:00' }
+        ];
+        
+        events.forEach(event => {
+            scheduleList.appendChild(Event(event));
         });
         
-        const event2 = Event({
-            icon: 'light',
-            iconLabel: 'Освещение',
-            title: 'Xiaomi Yeelight LED Smart Bulb',
-            subtitle: 'Включится в 17:00'
-        });
+        dashboard.appendChild(scheduleList);
+        section.appendChild(dashboard);
         
-        const event3 = Event({
-            icon: 'light',
-            iconLabel: 'Освещение',
-            title: 'Xiaomi Yeelight LED Smart Bulb',
-            subtitle: 'Включится в 17:00'
-        });
+        return section;
+    }
+
+    function createScriptsSection() {
+        const section = document.createElement('section');
+        section.className = 'section main__scripts';
         
-        scheduleList.appendChild(event1);
-        scheduleList.appendChild(event2);
-        scheduleList.appendChild(event3);
-        
-        heroDashboard.appendChild(primaryDiv);
-        heroDashboard.appendChild(scheduleList);
-        
-        generalSection.appendChild(generalTitle);
-        generalSection.appendChild(heroDashboard);
-        
-        const scriptsSection = document.createElement('section');
-        scriptsSection.className = 'section main__scripts';
-        
-        const scriptsTitle = document.createElement('h2');
-        scriptsTitle.className = 'section__title section__title-header';
-        scriptsTitle.textContent = 'Избранные сценарии';
+        const title = document.createElement('h2');
+        title.className = 'section__title section__title-header';
+        title.textContent = 'Избранные сценарии';
+        section.appendChild(title);
         
         const eventGrid = document.createElement('ul');
         eventGrid.className = 'event-grid';
         
         const slimEvents = [
-            { icon: 'light2', iconLabel: 'Освещение', title: 'Выключить весь свет в доме и во дворе' },
-            { icon: 'schedule', iconLabel: 'Расписание', title: 'Я ухожу' },
-            { icon: 'light2', iconLabel: 'Освещение', title: 'Включить свет в коридоре' },
-            { icon: 'temp2', iconLabel: 'Температура', title: 'Набрать горячую ванну', subtitle: 'Начнётся в 18:00' },
-            { icon: 'temp2', iconLabel: 'Температура', title: 'Сделать пол тёплым во всей квартире' }
+            { icon: 'light2', iconLabel: 'Освещение', title: 'Выключить весь свет в доме и во дворе', slim: true },
+            { icon: 'schedule', iconLabel: 'Расписание', title: 'Я ухожу', slim: true },
+            { icon: 'light2', iconLabel: 'Освещение', title: 'Включить свет в коридоре', slim: true },
+            { icon: 'temp2', iconLabel: 'Температура', title: 'Набрать горячую ванну', subtitle: 'Начнётся в 18:00', slim: true },
+            { icon: 'temp2', iconLabel: 'Температура', title: 'Сделать пол тёплым во всей квартире', slim: true }
         ];
         
         slimEvents.forEach(event => {
-            const slimEvent = Event({ ...event, slim: true });
-            eventGrid.appendChild(slimEvent);
+            eventGrid.appendChild(Event(event));
         });
         
-        scriptsSection.appendChild(scriptsTitle);
-        scriptsSection.appendChild(eventGrid);
+        section.appendChild(eventGrid);
         
-        const devicesSection = document.createElement('section');
-        devicesSection.className = 'section main__devices';
+        return section;
+    }
+
+    function createDevicesSection() {
+        const section = document.createElement('section');
+        section.className = 'section main__devices';
         
-        const devicesTitleDiv = document.createElement('div');
-        devicesTitleDiv.className = 'section__title';
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'section__title';
         
-        const devicesTitle = document.createElement('h2');
-        devicesTitle.className = 'section__title-header';
-        devicesTitle.textContent = 'Избранные устройства';
+        const title = document.createElement('h2');
+        title.className = 'section__title-header';
+        title.textContent = 'Избранные устройства';
+        titleDiv.appendChild(title);
         
         const select = document.createElement('select');
         select.className = 'section__select';
@@ -340,6 +341,7 @@
             option.textContent = TABS[key].title;
             select.appendChild(option);
         });
+        titleDiv.appendChild(select);
         
         const tabsList = document.createElement('ul');
         tabsList.setAttribute('role', 'tablist');
@@ -365,6 +367,8 @@
             
             tabsList.appendChild(tab);
         });
+        titleDiv.appendChild(tabsList);
+        section.appendChild(titleDiv);
         
         const panelWrapper = document.createElement('div');
         panelWrapper.className = 'section__panel-wrapper';
@@ -484,21 +488,13 @@
             panelWrapper.appendChild(panel);
         });
         
-        devicesTitleDiv.appendChild(devicesTitle);
-        devicesTitleDiv.appendChild(select);
-        devicesTitleDiv.appendChild(tabsList);
+        section.appendChild(panelWrapper);
         
-        devicesSection.appendChild(devicesTitleDiv);
-        devicesSection.appendChild(panelWrapper);
-        
-        main.appendChild(generalSection);
-        main.appendChild(scriptsSection);
-        main.appendChild(devicesSection);
         updatePanels();
         
-        return main;
+        return section;
     }
-
+    
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             app.appendChild(Header());
